@@ -1,0 +1,9 @@
+stages:
+    - deploy
+    - test
+
+testDeployment:
+    stage: deploy
+    image: aws-cli
+    script:
+        - aws-cli --version
