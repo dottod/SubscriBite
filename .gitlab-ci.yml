@@ -4,6 +4,21 @@ stages:
 
 testDeployment:
     stage: deploy
-    image: aws-cli
+    image: alpine
+    rules:
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     script:
-        - aws-cli --version
+        - apk search open ssh
+        - apk add openssh
+        - apk add openrc
+        - rc-update add sshd
+        - mkdir -p ~/.ssh
+        - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+        - chmod 600 ~/.ssh/id_rsa
+        - ssh -o StrictHostKeyChecking=no ec2-user@$INSTANCE_IP 
+            '
+                cd /home/ec2-user/subscribite;
+                git pull;
+                bash backendDeploy.sh;
+                exit;
+            '
