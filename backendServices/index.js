@@ -3,7 +3,7 @@ const app = express();
 
 
 app.get('/',(req,res)=>{
-    res.status(201).send({val:'CI/CD Pipeline Deployed.'});
+    res.status(201).send({val:'Sitting together..'});
 });
 
 app.post('/',(req,res)=>{
