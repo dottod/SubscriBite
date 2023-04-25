@@ -9,7 +9,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Create MySQL connection pool
 const pool = mysql.createPool({
-    host: 'localhost',
+    host: '18.236.171.164',
     user: 'root',
     password: 'subscribed',
     database: 'subscribite',
@@ -50,7 +50,7 @@ app.post('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const phone = req.body.phone;
+    const phone = req.body.phone_number;
 
     pool.query('SELECT * FROM users WHERE phone_number = ?', [phone], (err, result) => {
         if (err) {
