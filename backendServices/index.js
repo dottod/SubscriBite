@@ -73,7 +73,7 @@ app.post('/login', (req, res) => {
 
 app.post('/register', (req, res) => {
     const { firstname, lastname, phone_number, loc_id } = req.body;
-    console.log(firstname,lastname,phone_number)
+    console.log(firstname, lastname, phone_number)
     pool.query('INSERT INTO `users` (`firstname`, `lastname`, `phone_number`, `loc_id`) VALUES (?, ?, ?, ?)', [firstname, lastname, phone_number, loc_id], function (err, result) {
 
         if (err) {
@@ -93,6 +93,53 @@ app.post('/register', (req, res) => {
         }
     });
 });
+//Get all product Categories
+app.get('/categories', (req, res) => {
+    pool.query('SELECT DISTINCT category FROM products', (err, result) => {
+        if (err) {
+            console.log('An error occurred.');
+            res.status(500).send(err.toString());
+        } else {
+            res.status(201).send(JSON.stringify(result.rows));
+        }
+    });
+});
+//Get all products
+app.get('/products', (req, res) => {
+    const { category } = req.query;
+    pool.query('SELECT * FROM products WHERE category = ?', [category], (err, result) => {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                res.status(409).send('Category is not present');
+            } else {
+                console.log('An error occurred.');
+                res.status(500).send(err.toString());
+            }
+        } else {
+            res.status(201).send(JSON.stringify(result.rows));
+        }
+    });
+});
+// Get product desription
+app.get('/productDescription', (req, res) => {
+    const { id } = req.query;
+    pool.query('SELECT description FROM products WHERE id = ?', [id], (err, result) => {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                res.status(409).send('Product is not present');
+            } else {
+                console.log('An error occurred.');
+                res.status(500).send(err.toString());
+            }
+        } else {
+            // have to check if product id not present error would come or should i just add a check here for size of rows?
+            res.status(201).send(JSON.stringify(result.rows));
+        }
+    });
+});
+
+
+
 
 app.listen(4000, () => {
     console.log('Acception connection at Port Number, 4000');
