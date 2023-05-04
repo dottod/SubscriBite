@@ -161,7 +161,7 @@ app.get('/subscriptions/getSubscriptions', (req, res) => {
 
 app.post('/subscriptions/subscribe', (req, res) => {
     const { user_id, slot, sub_start_date, sub_end_date, freq, quantity, item_id } = req.body;
-    pool.query('INSERT INTO `subscriptions` (`user_id`, `item_id`, `sub_start_date`, `sub_end_date`,`freq`,`quantity`,`slot`,`is_active` ) VALUES (?, ?, ?, ?,?, ?, ?, 1)', [user_id, item_id, sub_start_date, sub_end_date,freq,quantity,slot], function (err, result) {
+    pool.query('INSERT INTO `subscriptions` (`user_id`, `item_id`, `sub_start_date`, `sub_end_date`,`freq`,`quantity`,`slot`,`is_active` ) VALUES (?, ?, ?, ?,?, ?, ?, 1) ON DUPLICATE KEY UPDATE sub_end_date= VALUES(sub_end_date),quantity = VALUES(quantity),freq = VALUES(freq) ', [user_id, item_id, sub_start_date, sub_end_date,freq,quantity,slot], function (err, result) {
 
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
@@ -172,7 +172,7 @@ app.post('/subscriptions/subscribe', (req, res) => {
             }
         }
         else {
-            res.status(201).send('Subscription added successfuly.');
+            res.status(201).send('Subscription added/updated successfuly.');
         }
     });
 });
