@@ -139,6 +139,43 @@ app.get('/productDescription', (req, res) => {
 });
 
 
+// get subscriptions:
+app.get('/subscriptions/getSubscriptions', (req, res) => {
+    const { userId, slot } = req.body;
+    pool.query('select item_id,user_id,sub_start_date,sub_end_date,freq,quantity,slot from subscriptions where is_active=1 and user_id = ?', [userId], function (err, result) {
+
+        if (err) {
+            if (err.code === 'ENOENT') {
+                res.status(409).send('No subscriptions found!');
+            }else
+            {
+                console.log('An error occured.')
+                res.status(500).send(err.toString());
+            }
+        }
+        else {
+            res.status(201).send(JSON.stringify(result.rows));
+        }
+    });
+});
+
+app.post('/subscriptions/subscribe', (req, res) => {
+    const { user_id, slot, sub_start_date, sub_end_date, freq, quantity, item_id } = req.body;
+    pool.query('INSERT INTO `subscriptions` (`user_id`, `item_id`, `sub_start_date`, `sub_end_date`,`freq`,`quantity`,`slot`,`is_active` ) VALUES (?, ?, ?, ?,?, ?, ?, 1)', [user_id, item_id, sub_start_date, sub_end_date,freq,quantity,slot], function (err, result) {
+
+        if (err) {
+            if (err.code === 'ER_DUP_ENTRY') {
+                res.status(409).send('A subscription for same Item and Slot already exist, update the subscription slot!');
+            } else {
+                console.log('An error occured.')
+                res.status(500).send(err.toString());
+            }
+        }
+        else {
+            res.status(201).send('Subscription added successfuly.');
+        }
+    });
+});
 
 
 app.listen(4000, () => {
