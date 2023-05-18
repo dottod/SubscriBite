@@ -249,6 +249,35 @@ app.post('/subscriptions/subscribe', (req, res) => {
 });
 
 
+app.get('/subscriptions/upcoming_orders', (req, res) => {
+    const { userId, slot } = req.body;
+
+    pool.query('select * from vw_upcoming_orders where user_id = ?', [userId], function (err, result) {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                res.status(409).send('No subscriptions found!');
+            }else
+            {
+                console.log('An error occured.')
+                res.status(500).send(err.toString());
+            }
+        }
+        else {
+            let finalRes = {}
+            for(let i in result){
+                val = result[i]
+                if (finalRes[val.delivery_date]){
+                    finalRes[val.delivery_date.toISOString().substring(0,10)].push(val)
+                }else{
+                    finalRes[val.delivery_date.toISOString().substring(0,10)]=[val]
+                }
+            }
+            console.log(finalRes)
+            res.status(201).send(JSON.stringify(finalRes));
+        }
+    });
+});
+
 app.listen(4000, () => {
     console.log('Acception connection at Port Number, 4000');
 });
