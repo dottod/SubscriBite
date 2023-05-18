@@ -40,7 +40,7 @@ app.use(session({
 }));
 
 
-app.get('/', (req, res) => {
+app.post('/', (req, res) => {
     res.status(201).send({ val: 'Services started' });
 });
 
@@ -73,7 +73,6 @@ app.post('/login', (req, res) => {
 
 app.post('/register', (req, res) => {
     const { firstname, lastname, phone_number, loc_id, user_id } = req.body;
-    console.log(firstname, lastname, phone_number)
     pool.query('INSERT INTO `users` (`firstname`, `lastname`, `phone_number`, `loc_id`,`id`,`valid_user`) VALUES (?, ?, ?, ?, ?,0)', [firstname, lastname, phone_number, loc_id, user_id], function (err, result) {
 
         if (err) {
@@ -138,7 +137,7 @@ app.post('/isRegistered', (req, res) => {
     });
 });
 //Get all product Categories
-app.get('/categories', (req, res) => {
+app.post('/categories', (req, res) => {
     const { postal_code } = req.query;
     pool.query('SELECT DISTINCT category FROM vw_product_geo_avail WHERE postal_code = ? AND stock_avail > ?', [postal_code, 0], (err, result) => {
         if (err) {
@@ -153,7 +152,7 @@ app.get('/categories', (req, res) => {
     });
 });
 //Get all products
-app.get('/products', (req, res) => {
+app.post('/products', (req, res) => {
     const { category, postal_code } = req.query;
 
     pool.query('SELECT * FROM vw_product_geo_avail WHERE postal_code = ? AND category = ? AND stock_avail > ? ', [postal_code, category, 0], (err, result) => {
@@ -182,7 +181,7 @@ app.get('/products', (req, res) => {
     });
 });
 // Get product desription
-app.get('/productDescription', (req, res) => {
+app.post('/productDescription', (req, res) => {
     const { id } = req.query;
     pool.query('SELECT * FROM products WHERE id = ?', [id], (err, result) => {
         if (err) {
@@ -212,7 +211,7 @@ app.get('/productDescription', (req, res) => {
 
 
 // get subscriptions:
-app.get('/subscriptions/getSubscriptions', (req, res) => {
+app.post('/subscriptions/getSubscriptions', (req, res) => {
     const { userId, slot } = req.body;
     pool.query('select item_id,user_id,sub_start_date,sub_end_date,freq,quantity,slot from subscriptions where is_active=1 and user_id = ?', [userId], function (err, result) {
 
@@ -249,7 +248,7 @@ app.post('/subscriptions/subscribe', (req, res) => {
 });
 
 
-app.get('/subscriptions/upcoming_orders', (req, res) => {
+app.post('/subscriptions/upcoming_orders', (req, res) => {
     const { userId, slot } = req.body;
 
     pool.query('select * from vw_upcoming_orders where user_id = ?', [userId], function (err, result) {
@@ -263,16 +262,15 @@ app.get('/subscriptions/upcoming_orders', (req, res) => {
             }
         }
         else {
-            let finalRes = {}
+            let finalRes = {};
             for(let i in result){
-                val = result[i]
-                if (finalRes[val.delivery_date]){
-                    finalRes[val.delivery_date.toISOString().substring(0,10)].push(val)
+                let delivery_date = result[i].delivery_date.toISOString().substring(0,10);
+                if (finalRes[delivery_date] !== undefined){
+                    finalRes[delivery_date].push(result[i]);
                 }else{
-                    finalRes[val.delivery_date.toISOString().substring(0,10)]=[val]
+                    finalRes[delivery_date] = [result[i]];
                 }
             }
-            console.log(finalRes)
             res.status(201).send(JSON.stringify(finalRes));
         }
     });
