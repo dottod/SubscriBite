@@ -1,9 +1,12 @@
 const express = require('express');
 const app = express();
 const mysql = require('mysql');
+const cors = require('cors');
+
 var session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -40,6 +43,9 @@ app.use(session({
 }));
 
 
+app.get('/', (req, res) => {
+    res.status(201).send({ val: 'Services started' });
+});
 app.post('/', (req, res) => {
     res.status(201).send({ val: 'Services started' });
 });
@@ -275,6 +281,36 @@ app.post('/subscriptions/upcoming_orders', (req, res) => {
         }
     });
 });
+
+app.post('/subscriptions/update_upcoming_orders', (req, res) => {
+    const { data } = req.body;
+    console.log(data)
+    let completedQueries = 0; 
+    for (let i in data) {
+        let { id, quantity, slot } = data[i];
+        const sqlQuery = `
+        Update upcoming_orders u set u.quantity= ?, u.slot = ? where id = ?`;
+
+        pool.query(sqlQuery, [ quantity, slot, id], function (err, result) {
+            if (err) {
+                if (err.code === 'ENOENT') {
+                    res.status(409).send('No subscriptions found!');
+                } else {
+                    console.log('An error occurred.');
+                    res.status(500).send(err.toString());
+                }
+            } else {
+                completedQueries++; 
+
+                if (completedQueries === data.length) {
+                    res.status(201).send(JSON.stringify('Success'));
+                }
+            }
+        });
+    }
+});
+
+  
 
 app.listen(4000, () => {
     console.log('Acception connection at Port Number, 4000');
