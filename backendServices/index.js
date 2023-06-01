@@ -56,19 +56,19 @@ app.post('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const phone = req.body.phone_number;
+    const email_address = req.body.email_address;
 
-    pool.query('SELECT * FROM users WHERE phone_number = ?', [phone], (err, result) => {
+    pool.query('SELECT * FROM users WHERE email_address = ?', [email_address], (err, result) => {
         if (err) {
             console.error(err);
             res.status(500).send('Internal server error');
         } else {
             if (result.length === 0) {
-                res.status(403).send('Phone number is invalid');
+                res.status(403).send('Email address is invalid');
             } else {
                 // set session data for the user
                 req.session.userId = result[0].id;
-                req.session.phone = result[0].phone_number;
+                req.session.email_address = result[0].email_address;
                 req.session.location = result[0].loc_id;
                 console.log(req.session);
                 res.status(200).send('Log in successful');
@@ -78,34 +78,65 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-    const { firstname, lastname, phone_number, loc_id, user_id } = req.body;
-    pool.query('INSERT INTO `users` (`firstname`, `lastname`, `phone_number`, `loc_id`,`id`,`valid_user`) VALUES (?, ?, ?, ?, ?,0)', [firstname, lastname, phone_number, loc_id, user_id], function (err, result) {
+    const { email_address, user_id } = req.body;
+    pool.query('INSERT INTO `users` (`email_address`,`id`,`valid_user`) VALUES ( ?, ?,0)', [email_address, user_id], function (err, result) {
 
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
-                res.status(409).send('Phone number is already registered');
+                res.status(409).send('User Is/Email Id is already registered');
             } else {
                 console.log('An error occured.')
                 res.status(500).send(err.toString());
             }
         }
         else {
-            req.session.userId = result.insertId;
-            req.session.phone = phone_number;
-            req.session.location = loc_id;
-            console.log(req.session);
             res.status(201).send('User successfully created');
         }
     });
 });
-app.post('/makeValid', (req, res) => {
-    const { user_id } = req.body;
-    pool.query('Update `users` SET valid_user = 1 WHERE id = ? ', [user_id], function (err, result) {
+app.post('/users/updateInfo', (req, res) => {
+    const { user_id, first_name, last_name, phone_number, address, email_address } = req.body;
+    let query = 'UPDATE users SET valid_user=1,';
+    const values = [];
+
+    if (first_name) {
+        query += ' firstname = ?,';
+        values.push(first_name);
+    }
+
+    if (last_name) {
+        query += ' lastname = ?,';
+        values.push(last_name);
+    }
+
+    if (phone_number) {
+        query += ' phone_number = ?,';
+        values.push(phone_number);
+    }
+
+    if (email_address) {
+        query += ' email_address = ?,';
+        values.push(email_address);
+    }
+
+    if (address) {
+        query += ' address = ?,';
+        values.push(address);
+    }
+
+    // Remove the trailing comma from the query
+    query = query.slice(0, -1);
+
+    query += ' WHERE id = ?';
+    values.push(user_id);
+    console.log(query);
+    console.log(values);
+    pool.query(query, values, function (err, result) {
         if (err) {
             if (err.code === 'ER_EMPTY_QUERY') {
                 res.status(409).send('User does not exist');
             } else {
-                console.log('An error occured.')
+                console.log('An error occurred.');
                 res.status(500).send(err.toString());
             }
         } else {
@@ -113,14 +144,17 @@ app.post('/makeValid', (req, res) => {
             console.log(result.affectedRows);
             if (result.length === 0 || result.affectedRows === 0) {
                 res.status(403).send('User id is invalid');
-            }
-            else if (result.changedRows)
-                res.status(201).send('User is Validated');
-            else
+            } else if (result.changedRows) {
+                res.status(201).send('User Info Updated');
+            } else {
                 res.status(201).send('No changes were made');
+            }
         }
     });
 });
+
+
+
 app.post('/isRegistered', (req, res) => {
     const { user_id } = req.body;
     pool.query('SELECT valid_user FROM users WHERE id = ?', [user_id], function (err, result) {
@@ -187,7 +221,7 @@ app.post('/products', (req, res) => {
     });
 });
 // Get product desription
-app.post('/productDescription', (req, res) => {
+app.post('/products/description', (req, res) => {
     const { id } = req.query;
     pool.query('SELECT * FROM products WHERE id = ?', [id], (err, result) => {
         if (err) {
@@ -255,8 +289,7 @@ app.post('/subscriptions/subscribe', (req, res) => {
 
 
 app.post('/subscriptions/upcoming_orders', (req, res) => {
-    const { userId: user_id, slot } = req.body;
-
+    const { user_id } = req.body;
     pool.query('select * from vw_upcoming_orders where user_id = ?', [user_id], function (err, result) {
         if (err) {
             if (err.code === 'ENOENT') {
