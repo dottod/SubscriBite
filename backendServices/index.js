@@ -178,7 +178,7 @@ app.post('/isRegistered', (req, res) => {
 });
 //Get all product Categories
 app.post('/categories', (req, res) => {
-    const { postal_code } = req.query;
+    const { postal_code } = req.body;
     pool.query('SELECT DISTINCT category FROM vw_product_geo_avail WHERE postal_code = ? AND stock_avail > ?', [postal_code, 0], (err, result) => {
         if (err) {
             console.log('An error occurred.');
@@ -193,7 +193,7 @@ app.post('/categories', (req, res) => {
 });
 //Get all products
 app.post('/products', (req, res) => {
-    const { category, postal_code } = req.query;
+    const { category, postal_code } = req.body;
 
     pool.query('SELECT * FROM vw_product_geo_avail WHERE postal_code = ? AND category = ? AND stock_avail > ? ', [postal_code, category, 0], (err, result) => {
         if (err) {
@@ -222,7 +222,7 @@ app.post('/products', (req, res) => {
 });
 // Get product desription
 app.post('/products/description', (req, res) => {
-    const { id } = req.query;
+    const { id } = req.body;
     pool.query('SELECT * FROM products WHERE id = ?', [id], (err, result) => {
         if (err) {
             if (err.code === 'ENOENT') {
