@@ -218,8 +218,8 @@ app.post('/productDescription', (req, res) => {
 
 // get subscriptions:
 app.post('/subscriptions/getSubscriptions', (req, res) => {
-    const { userId, slot } = req.body;
-    pool.query('select item_id,user_id,sub_start_date,sub_end_date,freq,quantity,slot from subscriptions where is_active=1 and user_id = ?', [userId], function (err, result) {
+    const user_id = req.body;
+    pool.query('select item_id,user_id,sub_start_date,sub_end_date,freq,quantity,slot from subscriptions where is_active=1 and user_id = ?', [user_id], function (err, result) {
 
         if (err) {
             if (err.code === 'ENOENT') {
@@ -255,25 +255,24 @@ app.post('/subscriptions/subscribe', (req, res) => {
 
 
 app.post('/subscriptions/upcoming_orders', (req, res) => {
-    const { userId, slot } = req.body;
+    const { userId: user_id, slot } = req.body;
 
-    pool.query('select * from vw_upcoming_orders where user_id = ?', [userId], function (err, result) {
+    pool.query('select * from vw_upcoming_orders where user_id = ?', [user_id], function (err, result) {
         if (err) {
             if (err.code === 'ENOENT') {
                 res.status(409).send('No subscriptions found!');
-            }else
-            {
+            } else {
                 console.log('An error occured.')
                 res.status(500).send(err.toString());
             }
         }
         else {
             let finalRes = {};
-            for(let i in result){
-                let delivery_date = result[i].delivery_date.toISOString().substring(0,10);
-                if (finalRes[delivery_date] !== undefined){
+            for (let i in result) {
+                let delivery_date = result[i].delivery_date.toISOString().substring(0, 10);
+                if (finalRes[delivery_date] !== undefined) {
                     finalRes[delivery_date].push(result[i]);
-                }else{
+                } else {
                     finalRes[delivery_date] = [result[i]];
                 }
             }
@@ -285,13 +284,13 @@ app.post('/subscriptions/upcoming_orders', (req, res) => {
 app.post('/subscriptions/update_upcoming_orders', (req, res) => {
     const { data } = req.body;
     console.log(data)
-    let completedQueries = 0; 
+    let completedQueries = 0;
     for (let i in data) {
         let { id, quantity, slot } = data[i];
         const sqlQuery = `
         Update upcoming_orders u set u.quantity= ?, u.slot = ? where id = ?`;
 
-        pool.query(sqlQuery, [ quantity, slot, id], function (err, result) {
+        pool.query(sqlQuery, [quantity, slot, id], function (err, result) {
             if (err) {
                 if (err.code === 'ENOENT') {
                     res.status(409).send('No subscriptions found!');
@@ -300,7 +299,7 @@ app.post('/subscriptions/update_upcoming_orders', (req, res) => {
                     res.status(500).send(err.toString());
                 }
             } else {
-                completedQueries++; 
+                completedQueries++;
 
                 if (completedQueries === data.length) {
                     res.status(201).send(JSON.stringify('Success'));
@@ -310,7 +309,7 @@ app.post('/subscriptions/update_upcoming_orders', (req, res) => {
     }
 });
 
-  
+
 
 app.listen(4000, () => {
     console.log('Acception connection at Port Number, 4000');
