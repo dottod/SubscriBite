@@ -194,8 +194,23 @@ app.post('/categories', (req, res) => {
 //Get all products
 app.post('/products', (req, res) => {
     const { category, postal_code } = req.body;
+    let params = [];
+    let query = 'SELECT * FROM vw_product_geo_avail WHERE 1 = 1';
 
-    pool.query('SELECT * FROM vw_product_geo_avail WHERE postal_code = ? AND category = ? AND stock_avail > ? ', [postal_code, category, 0], (err, result) => {
+    if (postal_code) {
+        query += ' AND postal_code = ?';
+        params.push(postal_code);
+    }
+
+    if (category) {
+        query += ' AND category = ?';
+        params.push(category);
+    }
+
+    query += ' AND stock_avail > ?';
+    params.push(0);
+
+    pool.query(query, params, (err, result) => {
         if (err) {
             if (err.code === 'ENOENT') {
                 res.status(409).send('Category is not present');
@@ -220,6 +235,8 @@ app.post('/products', (req, res) => {
         }
     });
 });
+
+
 // Get product desription
 app.post('/products/description', (req, res) => {
     const { id } = req.body;
