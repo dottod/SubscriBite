@@ -228,6 +228,7 @@ app.post('/products', (req, res) => {
                     price: row.price,
                     description: row.description,
                     img_url: row.img_url,
+                    unit: row.unit,
                     created_datetime: row.created_datetime
                 };
             });
@@ -257,6 +258,7 @@ app.post('/products/description', (req, res) => {
                     price: row.price,
                     description: row.description,
                     img_url: row.img_url,
+                    unit: row.unit,
                     created_datetime: row.created_datetime
                 };
             });
