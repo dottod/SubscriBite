@@ -179,7 +179,17 @@ app.post('/isRegistered', (req, res) => {
 //Get all product Categories
 app.post('/categories', (req, res) => {
     const { postal_code } = req.body;
-    pool.query('SELECT DISTINCT category FROM vw_product_geo_avail WHERE postal_code = ? AND stock_avail > ?', [postal_code, 0], (err, result) => {
+    let params = [];
+    let query = 'SELECT DISTINCT category FROM vw_product_geo_avail WHERE stock_avail > ?';
+
+    if (postal_code) {
+        query += ' AND postal_code = ?';
+        params.push(0, postal_code);
+    } else {
+        params.push(0);
+    }
+
+    pool.query(query, params, (err, result) => {
         if (err) {
             console.log('An error occurred.');
             res.status(500).send(err.toString());
@@ -191,6 +201,7 @@ app.post('/categories', (req, res) => {
         }
     });
 });
+
 //Get all products
 app.post('/products', (req, res) => {
     const { category, postal_code } = req.body;
