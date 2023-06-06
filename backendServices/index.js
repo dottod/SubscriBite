@@ -282,9 +282,9 @@ app.post('/products/description', (req, res) => {
 
 // get subscriptions:
 app.post('/subscriptions/getSubscriptions', (req, res) => {
-    const user_id = req.body;
-    pool.query('select item_id,user_id,sub_start_date,sub_end_date,freq,quantity,slot from subscriptions where is_active=1 and user_id = ?', [user_id], function (err, result) {
-
+    const {user_id }= req.body;
+    console.log(req.body,user_id)
+    pool.query('select * from vw_subscriptions where  user_id = ?', [user_id], function (err, result) {
         if (err) {
             if (err.code === 'ENOENT') {
                 res.status(409).send('No subscriptions found!');
@@ -294,7 +294,8 @@ app.post('/subscriptions/getSubscriptions', (req, res) => {
             }
         }
         else {
-            res.status(201).send(JSON.stringify(result.rows));
+            console.log(result);
+            res.status(201).send(JSON.stringify(result));
         }
     });
 });
@@ -346,7 +347,6 @@ app.post('/subscriptions/upcoming_orders', (req, res) => {
 
 app.post('/subscriptions/update_upcoming_orders', (req, res) => {
     const { data } = req.body;
-    console.log(data)
     let completedQueries = 0;
     for (let i in data) {
         let { id, quantity, slot } = data[i];
