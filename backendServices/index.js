@@ -154,6 +154,18 @@ app.post('/users/updateInfo', (req, res) => {
 });
 
 
+app.post('/users',(req,res)=>{
+    const { user_id } = req.body;
+    pool.query('SELECT * FROM users WHERE id = ?', [user_id], function (err, result) {
+        if (err) {
+            console.log('An error occured.')
+            res.status(500).send(err.toString());
+        } else {
+            res.send(JSON.stringify(result));
+        }
+    });
+}
+);
 
 app.post('/isRegistered', (req, res) => {
     const { user_id } = req.body;
