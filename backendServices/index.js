@@ -345,6 +345,25 @@ app.post('/subscriptions/upcoming_orders', (req, res) => {
     });
 });
 
+app.delete('/subscriptions', (req, res) => {
+    const { sub_id } = req.body;
+    pool.query('delete from upcoming_orders where subscription_id = ?', [sub_id], function (err, result) {
+        if (err) {
+                console.log('An error occured.')
+                res.status(500).send(err.toString());
+        }
+    })
+    pool.query('delete from subscriptions where id = ?', [sub_id], function (err, result) {
+        if (err) {
+                console.log('An error occured.')
+                res.status(500).send(err.toString());
+        }
+        else {
+            res.status(201).send(JSON.stringify("Success"));
+        }
+    });
+});
+
 app.post('/subscriptions/update_upcoming_orders', (req, res) => {
     const { data } = req.body;
     let completedQueries = 0;
