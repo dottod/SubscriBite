@@ -215,13 +215,13 @@ app.post('/isRegistered', (req, res) => {
             console.log(result);
             console.log(result.changedRows);
             if (result.length === 0 || result[0].valid_user === null) {
-                res.status(403).send('User id is not invalid');
+                res.status(403).send(fale);
             }
             else if (result[0].valid_user == 1) {
-                res.status(201).send('User is Registered');
+                res.status(201).send(true);
             }
             else {
-                res.status(201).send('User is not Registered');
+                res.status(201).send(false);
             }
         }
     });
@@ -482,6 +482,31 @@ app.post('/subscriptions/update_upcoming_orders', (req, res) => {
     }
 });
 
+app.post('/subscriptions/past_orders', (req, res) => {
+    const { user_id } = req.body;
+    pool.query('select * from vw_past_orders where user_id = ?', [user_id], function (err, result) {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                res.status(409).send('No subscriptions found!');
+            } else {
+                console.log('An error occured.')
+                res.status(500).send(err.toString());
+            }
+        }
+        else {
+            let finalRes = {};
+            for (let i in result) {
+                let delivery_date = result[i].delivery_date.toISOString().substring(0, 10);
+                if (finalRes[delivery_date] !== undefined) {
+                    finalRes[delivery_date].push(result[i]);
+                } else {
+                    finalRes[delivery_date] = [result[i]];
+                }
+            }
+            res.status(201).send(JSON.stringify(finalRes));
+        }
+    });
+});
 
 
 app.listen(4000, () => {
