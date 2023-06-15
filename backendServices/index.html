@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Display Logs</title>
+</head>
+<body>
+  <h1>Logs:</h1>
+  <pre id="logContents"></pre>
+
+  <button id="selectFileBtn">Select File</button>
+
+  <script>
+    document.getElementById('selectFileBtn').addEventListener('click', () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.txt';
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          const logContentsElement = document.getElementById('logContents');
+          logContentsElement.textContent = event.target.result;
+        };
+
+        reader.onerror = (event) => {
+          console.error('Error:', event.target.error);
+          const logContentsElement = document.getElementById('logContents');
+          logContentsElement.textContent = 'Error occurred while reading the file.';
+        };
+
+        reader.readAsText(file);
+      });
+
+      fileInput.click();
+    });
+  </script>
+</body>
+</html>
