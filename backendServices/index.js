@@ -15,23 +15,23 @@ app.use((req, res, next) => {
     if (req.url === "/") {
         next();
         return;
-      }
-      
-    let logData = `${new Date().toISOString()} - ${req.method} ${req.url}\n`;
-  
-    if (req.body) {
-      const requestBody = JSON.stringify(req.body, null, 2);
-      logData += `Request Body:\n${requestBody}\n`;
     }
-  
+
+    let logData = `${new Date().toISOString()} - ${req.method} ${req.url}\n`;
+
+    if (req.body) {
+        const requestBody = JSON.stringify(req.body, null, 2);
+        logData += `Request Body:\n${requestBody}\n`;
+    }
+
     fs.appendFile('logs.txt', logData, (err) => {
-      if (err) {
-        console.error('Error writing to log file:', err);
-      }
+        if (err) {
+            console.error('Error writing to log file:', err);
+        }
     });
-  
+
     next();
-  });
+});
 
 // Create MySQL connection pool
 const pool = mysql.createPool({
@@ -67,26 +67,26 @@ app.use(session({
 
 
 app.get('/', (req, res) => {
-  fs.readFile('logs.txt', 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading log file:', err);
-      res.status(500).send('Error reading log file');
-    } else {
-      res.send(`<pre>${data}</pre>`);
-    }
-  });
+    fs.readFile('logs.txt', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading log file:', err);
+            res.status(500).send('Error reading log file');
+        } else {
+            res.send(`<pre>${data}</pre>`);
+        }
+    });
 });
 
 app.post('/', (req, res) => {
     fs.readFile('logs.txt', 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading log file:', err);
-        res.status(500).send('Error reading log file');
-      } else {
-        res.send(`<pre>${data}</pre>`);
-      }
+        if (err) {
+            console.error('Error reading log file:', err);
+            res.status(500).send('Error reading log file');
+        } else {
+            res.send(`<pre>${data}</pre>`);
+        }
     });
-  });
+});
 
 app.post('/', (req, res) => {
     res.status(201).send({ val: 'Initialization of SubscriBite' });
@@ -192,7 +192,7 @@ app.post('/users/updateInfo', (req, res) => {
 });
 
 
-app.post('/users',(req,res)=>{
+app.post('/users', (req, res) => {
     const { user_id } = req.body;
     pool.query('SELECT * FROM users WHERE id = ?', [user_id], function (err, result) {
         if (err) {
@@ -271,6 +271,9 @@ app.post('/products', (req, res) => {
     query += ' AND stock_avail > ?';
     params.push(0);
 
+    // Add the ORDER BY clause to sort by product name in ascending order
+    query += ' ORDER BY name ASC';
+
     pool.query(query, params, (err, result) => {
         if (err) {
             if (err.code === 'ENOENT') {
@@ -332,8 +335,8 @@ app.post('/products/description', (req, res) => {
 
 // get subscriptions:
 app.post('/subscriptions/getSubscriptions', (req, res) => {
-    const {user_id }= req.body;
-    console.log(req.body,user_id)
+    const { user_id } = req.body;
+    console.log(req.body, user_id)
     pool.query('select * from vw_subscriptions where  user_id = ?', [user_id], function (err, result) {
         if (err) {
             if (err.code === 'ENOENT') {
@@ -352,7 +355,7 @@ app.post('/subscriptions/getSubscriptions', (req, res) => {
 
 
 app.post('/subscriptions/getLatest', (req, res) => {
-    const {user_id }= req.body;
+    const { user_id } = req.body;
     pool.query('select * from vw_subscriptions where  user_id = ? order by subscription_id desc limit 1', [user_id], function (err, result) {
         if (err) {
             if (err.code === 'ENOENT') {
@@ -389,7 +392,7 @@ app.post('/subscriptions/subscribe', (req, res) => {
 
 app.put('/subscriptions/subscribe', (req, res) => {
     const { sub_id, slot, sub_start_date, sub_end_date, freq, quantity } = req.body;
-    pool.query('Update subscriptions SET sub_start_date = ?,sub_end_date =?,freq = ?,quantity = ?, slot = ?,is_active= ? where id  = ?', [sub_start_date, sub_end_date, freq, quantity, slot,1,sub_id], function (err, result) {
+    pool.query('Update subscriptions SET sub_start_date = ?,sub_end_date =?,freq = ?,quantity = ?, slot = ?,is_active= ? where id  = ?', [sub_start_date, sub_end_date, freq, quantity, slot, 1, sub_id], function (err, result) {
 
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
@@ -437,14 +440,14 @@ app.delete('/subscriptions', (req, res) => {
     const { sub_id } = req.body;
     pool.query('delete from upcoming_orders where subscription_id = ?', [sub_id], function (err, result) {
         if (err) {
-                console.log('An error occured.')
-                res.status(500).send(err.toString());
+            console.log('An error occured.')
+            res.status(500).send(err.toString());
         }
     })
     pool.query('delete from subscriptions where id = ?', [sub_id], function (err, result) {
         if (err) {
-                console.log('An error occured.')
-                res.status(500).send(err.toString());
+            console.log('An error occured.')
+            res.status(500).send(err.toString());
         }
         else {
             res.status(201).send(JSON.stringify("Success"));
