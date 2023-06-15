@@ -12,6 +12,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
+    if (req.url === "/") {
+        next();
+        return;
+      }
+      
     let logData = `${new Date().toISOString()} - ${req.method} ${req.url}\n`;
   
     if (req.body) {
