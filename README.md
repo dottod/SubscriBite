@@ -3,7 +3,6 @@
 Welcome to Subscribite, a subscription-based grocery delivery app that provides a convenient and hassle-free way to order groceries and have them delivered right to your doorstep.
 
 ![Subscribite Poster](/images/poster.png)
-
 ![Subscribite Logo](/images/subscribite_logo.jpeg)
 
 ## Table of Contents
@@ -57,9 +56,9 @@ Open your web browser and visit http://localhost:3000 to access Subscribite.
 
 Home Screen
 Home Screen - Discover a wide range of grocery items and subscription options.
-
+![Subscribite Logo](/images/ss_1.png)
+![Subscribite Logo](/images/ss_2.png)
 Subscription Management
 Subscription Management - View and manage your subscribed items and delivery schedule.
-
-Checkout
-Checkout - Review your order details, provide delivery information, and choose a payment method.
+![Subscribite Logo](/images/cs_1.png)
+![Subscribite Logo](/images/cs_2.png)
