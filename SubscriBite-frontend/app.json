@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "notification": {
+      "icon": "./assets/app_icon.png"
+    },
+    "name": "SubscriBite",
+    "slug": "SubscriBite",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/app_icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/app_icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#D8EDD9"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/app_icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.subscribite.SubscriBite"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/app_icon.png",
+          "color": "#ffffff"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7877e9e1-c511-4982-97dc-61067cc16bca"
+      }
+    },
+    "owner": "subscribite"
+  }
+}
